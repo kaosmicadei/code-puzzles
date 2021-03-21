@@ -1,6 +1,6 @@
 import Data.Char (digitToInt)
 
-findCodeWith originalDigit = filter (\x -> verifyDigit x == originalDigit) . replaceMissing
+findCodeWithDigit originalDigit num guesses = filter (\x -> verifyDigit x == originalDigit)  (replaceMissing num guesses)
 
 verifyDigit = isDigitZero . flip rem 11 . sum . zipWith (*) (cycle [2..9]) . map digitToInt . reverse
   where
@@ -8,12 +8,12 @@ verifyDigit = isDigitZero . flip rem 11 . sum . zipWith (*) (cycle [2..9]) . map
     isDigitZero 1 = 0
     isDigitZero n = 11 - n
 
-replaceMissing num = go num ""
+replaceMissing num guesses = go num guesses ""
   where
-    go [] acc = pure (reverse acc)
-    go (x:xs) acc | x == 'x'  = do n <- "0123456789"
-                                   go xs (n:acc)
-                  | otherwise = go xs (x:acc)
+    go [] _  acc = pure (reverse acc)
+    go xs [] acc = pure $ (reverse acc) ++ xs
+    go (x:xs) (g:gs) acc | x == 'x'  = do n <- g
+                                          go xs gs (n:acc)
+                         | otherwise = go xs (g:gs) (x:acc)
 
-
-main = print $ findCodeWith 3 "123x5678910x11213"
+main = print $ findCodeWithDigit 7 "35170860744463005078550000003741901xxx04399" ["68", "38", "68"]
